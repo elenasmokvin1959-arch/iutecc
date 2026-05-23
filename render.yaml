@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: iutecc
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
