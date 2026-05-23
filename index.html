@@ -13,9 +13,7 @@
         <span class="brand-mark" aria-hidden="true">
           <img src="logo.jpg" alt="" onerror="this.onerror=null;this.src='banner.jpg';">
         </span>
-        <span>
-          <strong>Iute 🌶</strong>
-        </span>
+        <span><strong>Iute 🌶</strong></span>
       </a>
       <nav class="top-actions" aria-label="Навигация">
         <a href="#links">Каталог</a>
@@ -35,78 +33,33 @@
             <a class="btn ghost" href="#reviewForm">Оставить отзыв</a>
           </div>
         </div>
-        <div class="hero-media">
-          <img src="banner.jpg" alt="Iute" onerror="this.onerror=null;this.src='logo.jpg';">
-        </div>
+        <div class="hero-media"><img src="banner.jpg" alt="Iute" onerror="this.onerror=null;this.src='logo.jpg';"></div>
       </section>
-
       <section class="section" id="links">
-        <div class="section-head">
-          <p class="eyebrow">каталог</p>
-          <h2>Основные переходы</h2>
-        </div>
+        <div class="section-head"><div><p class="eyebrow">каталог</p><h2>Основные переходы</h2></div></div>
         <div class="card-grid" id="cardGrid"></div>
       </section>
-
       <section class="section compact">
-        <div class="section-head">
-          <p class="eyebrow">быстрые кнопки</p>
-          <h2>Чаты и контакты</h2>
-        </div>
+        <div class="section-head"><div><p class="eyebrow">быстрые кнопки</p><h2>Чаты и контакты</h2></div></div>
         <div class="chat-list" id="chatList"></div>
       </section>
-
       <section class="reviews-section" id="reviews">
-        <div class="section-head">
-          <p class="eyebrow">отзывы</p>
-          <h2>Отзывы посетителей</h2>
-        </div>
-        <div class="review-ticker" aria-live="polite">
-          <div class="review-track" id="reviewTrack"></div>
-        </div>
-
+        <div class="section-head"><div><p class="eyebrow">отзывы</p><h2>Отзывы посетителей</h2></div></div>
+        <div class="review-ticker" aria-live="polite"><div class="review-track" id="reviewTrack"></div></div>
         <form class="review-form" id="reviewForm">
           <h3>Оставить отзыв</h3>
-          <label>
-            <span>Telegram логин</span>
-            <input id="reviewLogin" type="text" placeholder="@username" autocomplete="off" required>
-          </label>
-          <label>
-            <span>Отзыв</span>
-            <textarea id="reviewText" rows="5" placeholder="Напишите отзыв" required></textarea>
-          </label>
-          <fieldset class="rating-field">
-            <legend>Оставить звезды</legend>
-            <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5">
-              <button type="button" class="star is-active" data-rating="1" aria-label="1 звезда">★</button>
-              <button type="button" class="star is-active" data-rating="2" aria-label="2 звезды">★</button>
-              <button type="button" class="star is-active" data-rating="3" aria-label="3 звезды">★</button>
-              <button type="button" class="star is-active" data-rating="4" aria-label="4 звезды">★</button>
-              <button type="button" class="star is-active" data-rating="5" aria-label="5 звезд">★</button>
-            </div>
-          </fieldset>
+          <label><span>Telegram логин</span><input id="reviewLogin" type="text" placeholder="@username" autocomplete="off" required></label>
+          <label><span>Отзыв</span><textarea id="reviewText" rows="5" placeholder="Напишите отзыв" required></textarea></label>
+          <fieldset class="rating-field"><legend>Оставить звезды</legend><div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5"><button type="button" class="star is-active" data-rating="1" aria-label="1 звезда">★</button><button type="button" class="star is-active" data-rating="2" aria-label="2 звезды">★</button><button type="button" class="star is-active" data-rating="3" aria-label="3 звезды">★</button><button type="button" class="star is-active" data-rating="4" aria-label="4 звезды">★</button><button type="button" class="star is-active" data-rating="5" aria-label="5 звезд">★</button></div></fieldset>
           <button class="btn primary" type="submit">Оставить отзыв</button>
           <p class="form-note is-hidden" id="reviewNotice"></p>
         </form>
       </section>
     </main>
-
-    <footer class="footer">
-      <span>Iute 🌶</span>
-      <span>Защищено Cerber Industries 2026</span>
-    </footer>
+    <footer class="footer"><span>Iute 🌶</span><span>Защищено Cerber Industries 2026</span></footer>
   </div>
-
-  <div class="news-overlay is-hidden" id="newsOverlay" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
-    <div class="news-modal">
-      <button class="icon-btn" id="closeNews" type="button" aria-label="Закрыть">×</button>
-      <p class="eyebrow">новости</p>
-      <h2 id="newsTitle">Актуально</h2>
-      <p id="newsText"></p>
-      <button class="btn primary" id="acceptNews" type="button">Понятно</button>
-    </div>
-  </div>
-
+  <a class="quiet-admin-link" href="admin.html" aria-label="Админ панель" title="Админ панель"></a>
+  <div class="news-overlay is-hidden" id="newsOverlay" role="dialog" aria-modal="true" aria-labelledby="newsTitle"><div class="news-modal"><button class="icon-btn" id="closeNews" type="button" aria-label="Закрыть">×</button><p class="eyebrow">новости</p><h2 id="newsTitle">Актуально</h2><p id="newsText"></p><button class="btn primary" id="acceptNews" type="button">Понятно</button></div></div>
   <script src="app.js"></script>
 </body>
 </html>
