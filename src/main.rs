@@ -114,7 +114,7 @@ fn serve_file(stream: &mut TcpStream, path: &str) {
         Ok(body) => ("200 OK", body, content_type(&file_path)),
         Err(_) => ("404 Not Found", b"Not found".to_vec(), "text/plain; charset=utf-8"),
     };
-    send_bytes(stream, status, body, content_type, "public, max-age=60");
+    send_bytes(stream, status, body, content_type, "no-store");
 }
 
 fn send_json(stream: &mut TcpStream, status: &str, value: Value) {
