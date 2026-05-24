@@ -4,10 +4,8 @@ use std::fs;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 const DATA_FILE: &str = "data.json";
-const UPLOAD_DIR: &str = "uploads";
 
 fn main() -> std::io::Result<()> {
     let port = env::var("PORT").unwrap_or_else(|_| "10000".to_string());
@@ -86,13 +84,10 @@ fn save_site_data(stream: &mut TcpStream, request: &str, body: &str) {
     }
 
     match serde_json::from_str::<Value>(body) {
-        Ok(mut value) => {
-            convert_data_images(&mut value);
-            match write_data(&value) {
-                Ok(_) => send_json(stream, "200 OK", json!({"ok": true})),
-                Err(_) => send_json(stream, "500 Internal Server Error", json!({"ok": false})),
-            }
-        }
+        Ok(value) => match write_data(&value) {
+            Ok(_) => send_json(stream, "200 OK", json!({"ok": true})),
+            Err(_) => send_json(stream, "500 Internal Server Error", json!({"ok": false})),
+        },
         Err(_) => send_json(stream, "400 Bad Request", json!({"ok": false, "error": "bad json"})),
     }
 }
@@ -113,9 +108,10 @@ fn save_upload(stream: &mut TcpStream, request: &str, body: &str) {
         return;
     };
 
-    match save_data_url(image) {
-        Some(url) => send_json(stream, "200 OK", json!({"ok": true, "url": url})),
-        None => send_json(stream, "400 Bad Request", json!({"ok": false, "error": "bad image"})),
+    if image.starts_with("data:image/") && image.contains(";base64,") {
+        send_json(stream, "200 OK", json!({"ok": true, "url": image}))
+    } else {
+        send_json(stream, "400 Bad Request", json!({"ok": false, "error": "bad image"}))
     }
 }
 
@@ -172,105 +168,16 @@ fn check_admin_password(request: &str) -> bool {
 }
 
 fn load_data() -> Value {
-    let mut value = fs::read_to_string(DATA_FILE)
+    fs::read_to_string(DATA_FILE)
         .ok()
         .and_then(|text| serde_json::from_str(&text).ok())
-        .unwrap_or_else(|| json!({}));
-
-    if convert_data_images(&mut value) {
-        let _ = write_data(&value);
-    }
-
-    value
+        .unwrap_or_else(|| json!({}))
 }
 
 fn write_data(value: &Value) -> std::io::Result<()> {
     let bytes = serde_json::to_vec_pretty(value)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
     fs::write(DATA_FILE, bytes)
-}
-
-fn convert_data_images(value: &mut Value) -> bool {
-    match value {
-        Value::String(text) if text.starts_with("data:image/") => {
-            if let Some(url) = save_data_url(text) {
-                *text = url;
-                return true;
-            }
-            false
-        }
-        Value::Array(items) => {
-            let mut changed = false;
-            for item in items {
-                changed |= convert_data_images(item);
-            }
-            changed
-        }
-        Value::Object(map) => {
-            let mut changed = false;
-            for item in map.values_mut() {
-                changed |= convert_data_images(item);
-            }
-            changed
-        }
-        _ => false,
-    }
-}
-
-fn save_data_url(data_url: &str) -> Option<String> {
-    let (meta, encoded) = data_url.split_once(',')?;
-    if !meta.starts_with("data:image/") {
-        return None;
-    }
-
-    let ext = meta
-        .trim_start_matches("data:image/")
-        .split(';')
-        .next()
-        .unwrap_or("jpg")
-        .to_ascii_lowercase();
-    let ext = match ext.as_str() {
-        "jpeg" | "jpg" => "jpg",
-        "png" => "png",
-        "webp" => "webp",
-        "gif" => "gif",
-        _ => "jpg",
-    };
-
-    let bytes = decode_base64(encoded)?;
-    fs::create_dir_all(UPLOAD_DIR).ok()?;
-    let stamp = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_millis();
-    let path = format!("{UPLOAD_DIR}/iute-{stamp}.{ext}");
-    fs::write(&path, bytes).ok()?;
-    Some(format!("/{path}"))
-}
-
-fn decode_base64(input: &str) -> Option<Vec<u8>> {
-    let mut output = Vec::with_capacity(input.len() * 3 / 4);
-    let mut buffer = 0u32;
-    let mut bits = 0u8;
-
-    for byte in input.bytes() {
-        let value = match byte {
-            b'A'..=b'Z' => byte - b'A',
-            b'a'..=b'z' => byte - b'a' + 26,
-            b'0'..=b'9' => byte - b'0' + 52,
-            b'+' => 62,
-            b'/' => 63,
-            b'=' => break,
-            b'\r' | b'\n' | b' ' => continue,
-            _ => return None,
-        } as u32;
-
-        buffer = (buffer << 6) | value;
-        bits += 6;
-        if bits >= 8 {
-            bits -= 8;
-            output.push(((buffer >> bits) & 0xff) as u8);
-        }
-    }
-
-    Some(output)
 }
 
 fn serve_file(stream: &mut TcpStream, path: &str) {
