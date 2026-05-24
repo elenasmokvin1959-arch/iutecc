@@ -1,4 +1,3 @@
-use base64::{engine::general_purpose, Engine as _};
 use serde_json::{json, Value};
 use std::env;
 use std::fs;
@@ -238,12 +237,40 @@ fn save_data_url(data_url: &str) -> Option<String> {
         _ => "jpg",
     };
 
-    let bytes = general_purpose::STANDARD.decode(encoded).ok()?;
+    let bytes = decode_base64(encoded)?;
     fs::create_dir_all(UPLOAD_DIR).ok()?;
     let stamp = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_millis();
     let path = format!("{UPLOAD_DIR}/iute-{stamp}.{ext}");
     fs::write(&path, bytes).ok()?;
     Some(format!("/{path}"))
+}
+
+fn decode_base64(input: &str) -> Option<Vec<u8>> {
+    let mut output = Vec::with_capacity(input.len() * 3 / 4);
+    let mut buffer = 0u32;
+    let mut bits = 0u8;
+
+    for byte in input.bytes() {
+        let value = match byte {
+            b'A'..=b'Z' => byte - b'A',
+            b'a'..=b'z' => byte - b'a' + 26,
+            b'0'..=b'9' => byte - b'0' + 52,
+            b'+' => 62,
+            b'/' => 63,
+            b'=' => break,
+            b'\r' | b'\n' | b' ' => continue,
+            _ => return None,
+        } as u32;
+
+        buffer = (buffer << 6) | value;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            output.push(((buffer >> bits) & 0xff) as u8);
+        }
+    }
+
+    Some(output)
 }
 
 fn serve_file(stream: &mut TcpStream, path: &str) {
