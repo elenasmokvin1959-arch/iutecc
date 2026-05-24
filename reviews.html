@@ -45,7 +45,7 @@
           </div>
           <div class="review-summary" id="reviewSummary">
             <strong>0.00</strong>
-            <span>0 отзывов / 5</span>
+            <span>0 отзывов</span>
           </div>
         </div>
 
@@ -112,7 +112,7 @@
         const summary = document.getElementById("reviewSummary");
         const sum = approved.reduce((total, review) => total + Number(review.rating || 5), 0);
         const average = approved.length ? sum / approved.length : 0;
-        summary.innerHTML = `<strong>${average.toFixed(2)}</strong><span>${approved.length} отзывов / 5</span>`;
+        summary.innerHTML = `<strong>${average.toFixed(2)}</strong><span>${approved.length} отзывов</span>`;
 
         const list = document.getElementById("reviewsList");
         if (!approved.length) {
