@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iute 🌶 | Отзывы</title>
+  <link rel="stylesheet" href="styles.css?v=11">
+  <style>
+    .review-summary{display:grid;min-width:150px;justify-items:end;gap:2px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgba(255,255,255,.06)}
+    .review-summary strong{color:var(--gold-2);font-size:28px;line-height:1}
+    .review-summary span{color:var(--muted);font-size:12px}
+    .reviews-list{display:grid;gap:12px;margin-top:18px}
+    .full-review-card{display:grid;grid-template-columns:54px minmax(0,1fr);gap:14px;border:1px solid var(--line);border-radius:8px;padding:16px;background:var(--panel);box-shadow:0 18px 42px rgba(0,0,0,.22)}
+    .full-review-card p{line-height:1.55}
+    .full-review-card time{color:var(--muted);font-size:12px}
+    .review-number{display:grid;width:44px;height:44px;place-items:center;border:1px solid rgba(255,138,34,.45);border-radius:8px;color:var(--gold-2);background:rgba(255,63,22,.12);font-weight:800}
+    @media(max-width:620px){.review-summary{justify-items:start}.full-review-card{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="site-shell" id="siteShell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="IUTE">
+        <span class="brand-mark" aria-hidden="true">
+          <img id="brandLogo" src="logo.jpg" alt="" onerror="this.onerror=null;this.src='banner.jpg';">
+        </span>
+        <span>
+          <strong>Iute 🌶</strong>
+        </span>
+      </a>
+      <nav class="top-actions" aria-label="Навигация">
+        <a href="index.html#links">Каталог</a>
+        <a href="index.html#availability">Наличие</a>
+        <a href="reviews.html">Отзывы</a>
+        <a class="admin-link is-hidden" id="adminLink" href="admin.html">Админ</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="section reviews-page">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">отзывы</p>
+            <h1>Отзывы</h1>
+          </div>
+          <div class="review-summary" id="reviewSummary">
+            <strong>0.00</strong>
+            <span>0 отзывов / 5</span>
+          </div>
+        </div>
+
+        <form class="review-form" id="reviewForm">
+          <h3>Оставить отзыв</h3>
+          <label>
+            <span>Telegram логин</span>
+            <input id="reviewLogin" type="text" placeholder="@username" autocomplete="off" required>
+          </label>
+          <label>
+            <span>Отзыв</span>
+            <textarea id="reviewText" rows="5" placeholder="Напишите отзыв" required></textarea>
+          </label>
+          <fieldset class="rating-field">
+            <legend>Оставить звезды</legend>
+            <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5">
+              <button type="button" class="star is-active" data-rating="1" aria-label="1 звезда">★</button>
+              <button type="button" class="star is-active" data-rating="2" aria-label="2 звезды">★</button>
+              <button type="button" class="star is-active" data-rating="3" aria-label="3 звезды">★</button>
+              <button type="button" class="star is-active" data-rating="4" aria-label="4 звезды">★</button>
+              <button type="button" class="star is-active" data-rating="5" aria-label="5 звезд">★</button>
+            </div>
+          </fieldset>
+          <button class="btn primary" type="submit">Оставить отзыв</button>
+          <p class="form-note is-hidden" id="reviewNotice"></p>
+        </form>
+
+        <div class="reviews-list" id="reviewsList"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Iute 🌶</span>
+      <span>Защищено Cerber Industries 2026</span>
+    </footer>
+  </div>
+
+  <a class="quiet-admin-link" href="admin.html" aria-label="Админ панель" title="Админ панель"></a>
+
+  <script src="app.js?v=11"></script>
+  <script>
+    (function () {
+      const store = window.IuteStore;
+      if (!store) return;
+
+      function escapeHtml(value) {
+        return store.escapeHtml ? store.escapeHtml(value) : String(value || "");
+      }
+
+      function stars(rating) {
+        const value = Math.max(1, Math.min(5, Number(rating || 5)));
+        return "★".repeat(value) + "☆".repeat(5 - value);
+      }
+
+      function approvedReviews(data) {
+        return (data.reviews || []).filter(review => review.approved);
+      }
+
+      function render(data) {
+        const logo = document.getElementById("brandLogo");
+        if (logo && data.hero && data.hero.logo) logo.src = data.hero.logo;
+
+        const approved = approvedReviews(data);
+        const summary = document.getElementById("reviewSummary");
+        const sum = approved.reduce((total, review) => total + Number(review.rating || 5), 0);
+        const average = approved.length ? sum / approved.length : 0;
+        summary.innerHTML = `<strong>${average.toFixed(2)}</strong><span>${approved.length} отзывов / 5</span>`;
+
+        const list = document.getElementById("reviewsList");
+        if (!approved.length) {
+          list.innerHTML = `<article class="full-review-card"><strong>Пока нет отзывов</strong><p>Будьте первым, кто оставит отзыв.</p></article>`;
+          return;
+        }
+
+        list.innerHTML = approved.map((review, index) => `
+          <article class="full-review-card">
+            <div class="review-number">#${index + 1}</div>
+            <div>
+              <strong>${escapeHtml(review.login)}</strong>
+              <div class="review-rating">${stars(review.rating)}</div>
+              <p>${escapeHtml(review.text)}</p>
+              <time>${store.formatDate(review.createdAt)}</time>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      function setupStars() {
+        const picker = document.getElementById("starPicker");
+        let current = 5;
+        const paint = () => picker.querySelectorAll(".star").forEach(button => {
+          button.classList.toggle("is-active", Number(button.dataset.rating) <= current);
+        });
+        picker.addEventListener("click", event => {
+          const button = event.target.closest(".star");
+          if (!button) return;
+          current = Number(button.dataset.rating);
+          picker.dataset.value = String(current);
+          paint();
+        });
+        picker.dataset.value = String(current);
+        paint();
+      }
+
+      function setupForm() {
+        const form = document.getElementById("reviewForm");
+        form.addEventListener("submit", event => {
+          event.preventDefault();
+          const login = document.getElementById("reviewLogin").value.trim();
+          const text = document.getElementById("reviewText").value.trim();
+          const notice = document.getElementById("reviewNotice");
+
+          if (!/^@[A-Za-z0-9_]{4,32}$/.test(login)) {
+            notice.classList.remove("is-hidden");
+            notice.textContent = "Логин должен начинаться с @.";
+            return;
+          }
+
+          if (text.length < 5) {
+            notice.classList.remove("is-hidden");
+            notice.textContent = "Отзыв слишком короткий.";
+            return;
+          }
+
+          const data = store.loadData();
+          store.submitReview({
+            id: store.cryptoId(),
+            login,
+            text,
+            createdAt: new Date().toISOString(),
+            approved: false,
+            rating: Number(document.getElementById("starPicker").dataset.value || 5)
+          }, data);
+
+          form.reset();
+          setupStars();
+          notice.classList.remove("is-hidden");
+          notice.textContent = "Отзыв оставлен. Он появится после одобрения.";
+        });
+      }
+
+      if (new URLSearchParams(location.search).get("owner") === "1") localStorage.setItem(store.OWNER_KEY, "1");
+      if (localStorage.getItem(store.OWNER_KEY) === "1") document.getElementById("adminLink").classList.remove("is-hidden");
+
+      setupStars();
+      setupForm();
+      render(store.loadData());
+      store.loadServerData().then(changed => {
+        if (changed) render(store.loadData());
+      });
+    })();
+  </script>
+</body>
+</html>
