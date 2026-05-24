@@ -133,6 +133,17 @@
         `).join("");
       }
 
+      function cleanSummaryText() {
+        const label = document.querySelector("#reviewSummary span");
+        if (label) label.textContent = label.textContent.replace(" / 5", "");
+      }
+
+      new MutationObserver(cleanSummaryText).observe(document.getElementById("reviewSummary"), {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+
       function setupStars() {
         const picker = document.getElementById("starPicker");
         let current = 5;
@@ -195,7 +206,9 @@
       render(store.loadData());
       store.loadServerData().then(changed => {
         if (changed) render(store.loadData());
+        cleanSummaryText();
       });
+      cleanSummaryText();
     })();
   </script>
 </body>
